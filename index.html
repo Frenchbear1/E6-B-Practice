@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E6-B Practice</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --ink: #121b22;
+      --muted: #60707d;
+      --line: #d7e1e7;
+      --accent: #176b87;
+      --accent-dark: #0f4f65;
+      --good: #0d7a5f;
+      --bad: #b42318;
+      --bad-bg: #fff1f0;
+      --good-bg: #eaf8f1;
+      --shadow: 0 20px 60px rgba(19, 32, 43, 0.13);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(23, 107, 135, 0.12), transparent 340px), var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 10px 14px;
+    }
+
+    button:hover { filter: brightness(0.96); }
+    button:active { transform: translateY(1px); }
+    button.secondary { background: #dce8ee; color: #14313d; }
+    button.ghost { background: transparent; color: var(--accent-dark); border: 1px solid var(--line); }
+    button.small { min-height: 34px; padding: 7px 10px; font-size: 13px; }
+    button:disabled, input:disabled { cursor: not-allowed; opacity: 0.56; }
+
+    input, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+      outline: none;
+      padding: 10px 11px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(23, 107, 135, 0.14);
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .app {
+      width: min(1040px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 36px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stat, .panel, .result-item, .digit-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .stat { padding: 11px 12px; }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 2px;
+      font-size: clamp(20px, 4vw, 28px);
+      line-height: 1.05;
+    }
+
+    .practice { display: grid; gap: 16px; }
+
+    .question-panel {
+      min-height: 500px;
+      display: grid;
+      align-content: center;
+      gap: 22px;
+      padding: clamp(18px, 5vw, 42px);
+      box-shadow: var(--shadow);
+    }
+
+    .mode-pill {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid #c9e2ea;
+      background: #e7f3f7;
+      color: #123744;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .question-text {
+      font-size: clamp(22px, 3.6vw, 36px);
+      line-height: 1.14;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    .question-detail { display: none; }
+
+    .answer-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #answerInput {
+      min-height: 60px;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .feedback { min-height: 32px; font-size: 18px; font-weight: 900; }
+    .feedback.good { color: var(--good); }
+    .feedback.bad { color: var(--bad); }
+
+    .results { padding: 18px; box-shadow: var(--shadow); }
+    .results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .results h2 { margin: 0; font-size: 18px; }
+
+    .result-summary {
+      border-radius: var(--radius);
+      border: 1px solid #c6e5d5;
+      background: var(--good-bg);
+      color: #0f5132;
+      padding: 12px;
+      font-weight: 900;
+    }
+
+    .result-summary.has-wrongs { border-color: #f0c8c4; background: var(--bad-bg); color: var(--bad); }
+    .wrong-list { display: grid; gap: 10px; margin-top: 12px; }
+    .result-item { padding: 12px; background: var(--bad-bg); border-color: #f0c8c4; }
+    .result-item strong { display: block; margin-bottom: 3px; }
+    .result-item span { color: var(--muted); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      background: rgba(14, 24, 32, 0.52);
+      padding: 18px;
+    }
+
+    .modal {
+      width: min(900px, 100%);
+      max-height: min(88vh, 900px);
+      overflow: auto;
+      background: var(--panel);
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-head h2 { margin: 0; font-size: 20px; }
+    .modal-body { display: grid; gap: 18px; padding: 18px; }
+    .settings-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-title h3 { margin: 0; font-size: 15px; }
+    .section-title p { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .toggle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbfcfd;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .check-row input { width: 19px; min-height: 19px; accent-color: var(--accent); }
+    .digit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .digit-card { padding: 12px; background: #fbfcfd; }
+    .digit-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .digit-card-head strong { font-size: 15px; }
+    .digit-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .digit-inputs.single { grid-template-columns: 1fr; }
+    .modal-actions { display: flex; justify-content: end; gap: 10px; padding: 0 18px 18px; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 760px) {
+      .topbar { align-items: flex-start; }
+      .top-actions { flex-direction: column; align-items: stretch; }
+      .stats, .settings-row, .toggle-grid, .digit-grid, .answer-row { grid-template-columns: 1fr; }
+      .question-panel { min-height: 430px; }
+      .answer-row button { width: 100%; }
+    }
+
+    @media (max-width: 520px) {
+      .app { width: min(100% - 18px, 1040px); padding-top: 14px; }
+      .topbar { align-items: center; }
+      .question-text { font-size: clamp(21px, 6.2vw, 30px); }
+      .digit-inputs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><h1>E6-B Practice</h1></div>
+      <div class="top-actions">
+        <button id="settingsBtn" class="secondary" type="button">Setup</button>
+        <button id="startBtn" type="button">Start</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Practice status">
+      <div class="stat"><span>Timer</span><strong id="timer">00:00</strong></div>
+      <div class="stat"><span>Score</span><strong id="score">0 / 0</strong></div>
+      <div class="stat"><span>Accuracy</span><strong id="accuracy">100%</strong></div>
+      <div class="stat"><span>Streak</span><strong id="streak">0</strong></div>
+    </section>
+
+    <section class="practice">
+      <section class="panel question-panel" aria-live="polite">
+        <div><div class="mode-pill" id="modePill">Ready</div></div>
+        <div>
+          <div class="question-text" id="questionText">Press Start.</div>
+          <p class="question-detail" id="questionDetail">Setup in the menu.</p>
+        </div>
+        <div class="answer-row">
+          <input id="answerInput" type="text" inputmode="decimal" autocomplete="off" placeholder="Answer" aria-label="Answer" disabled>
+          <button id="submitBtn" type="button" disabled>Submit</button>
+          <button id="skipBtn" class="ghost" type="button" disabled>Skip</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </section>
+
+      <section class="panel results hidden" id="resultsPanel">
+        <div class="results-head">
+          <h2>Review</h2>
+          <button id="practiceWrongsBtn" class="secondary" type="button">Practice missed</button>
+        </div>
+        <div id="finalSummary" class="result-summary">No results yet.</div>
+        <div id="wrongList" class="wrong-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <section class="modal-backdrop hidden" id="settingsModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-head">
+        <h2 id="settingsTitle">Setup</h2>
+        <button id="closeSettingsBtn" class="ghost small" type="button">Close</button>
+      </div>
+      <div class="modal-body">
+        <section>
+          <div class="section-title"><div><h3>Session</h3><p>How long. How exact.</p></div></div>
+          <div class="settings-row">
+            <label>Questions
+              <select id="questionLimit">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="0">Unlimited</option>
+              </select>
+            </label>
+            <label>Answers
+              <select id="roundingMode">
+                <option value="whole" selected>Whole numbers</option>
+                <option value="tenth">Tenths allowed</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-title"><div><h3>Problem Types</h3><p>Pick what shows up.</p></div></div>
+          <div class="toggle-grid">
+            <label class="check-row">Addition <input class="typeToggle" type="checkbox" value="addition" checked></label>
+            <label class="check-row">Subtraction <input class="typeToggle" type="checkbox" value="subtraction" checked></label>
+            <label class="check-row">Multiplication <input class="typeToggle" type="checkbox" value="multiplication" checked></label>
+            <label class="check-row">Division <input class="typeToggle" type="checkbox" value="division" checked></label>
+            <label class="check-row">Time / speed / distance <input class="typeToggle" type="checkbox" value="tsd" checked></label>
+            <label class="check-row">Fuel <input class="typeToggle" type="checkbox" value="fuel" checked></label>
+            <label class="check-row">Climb / descent <input class="typeToggle" type="checkbox" value="climb" checked></label>
+            <label class="check-row">ETA <input class="typeToggle" type="checkbox" value="eta" checked></label>
+            <label class="check-row">Wind basics <input class="typeToggle" type="checkbox" value="wind" checked></label>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-title"><div><h3>Arithmetic Digits</h3><p>Fixed digits. Or random max.</p></div></div>
+          <div class="digit-grid">
+            <div class="digit-card" data-op="addition">
+              <div class="digit-card-head"><strong>Addition</strong><button class="ghost small modeBtn" type="button">Random</button></div>
+              <div class="digit-inputs fixedInputs">
+                <label>Top digits <input id="additionA" type="number" min="1" max="6" value="2"></label>
+                <label>Bottom digits <input id="additionB" type="number" min="1" max="6" value="2"></label>
+              </div>
+              <div class="digit-inputs single randomInputs hidden"><label>Max digits <input id="additionMax" type="number" min="1" max="6" value="3"></label></div>
+            </div>
+
+            <div class="digit-card" data-op="subtraction">
+              <div class="digit-card-head"><strong>Subtraction</strong><button class="ghost small modeBtn" type="button">Random</button></div>
+              <div class="digit-inputs fixedInputs">
+                <label>Top digits <input id="subtractionA" type="number" min="1" max="6" value="2"></label>
+                <label>Bottom digits <input id="subtractionB" type="number" min="1" max="6" value="2"></label>
+              </div>
+              <div class="digit-inputs single randomInputs hidden"><label>Max digits <input id="subtractionMax" type="number" min="1" max="6" value="3"></label></div>
+            </div>
+
+            <div class="digit-card" data-op="multiplication">
+              <div class="digit-card-head"><strong>Multiplication</strong><button class="ghost small modeBtn" type="button">Random</button></div>
+              <div class="digit-inputs fixedInputs">
+                <label>Left digits <input id="multiplicationA" type="number" min="1" max="6" value="2"></label>
+                <label>Right digits <input id="multiplicationB" type="number" min="1" max="6" value="1"></label>
+              </div>
+              <div class="digit-inputs single randomInputs hidden"><label>Max digits <input id="multiplicationMax" type="number" min="1" max="6" value="3"></label></div>
+            </div>
+
+            <div class="digit-card" data-op="division">
+              <div class="digit-card-head"><strong>Division</strong><button class="ghost small modeBtn" type="button">Random</button></div>
+              <div class="digit-inputs fixedInputs">
+                <label>Answer digits <input id="divisionA" type="number" min="1" max="6" value="2"></label>
+                <label>Divisor digits <input id="divisionB" type="number" min="1" max="6" value="1"></label>
+              </div>
+              <div class="digit-inputs single randomInputs hidden"><label>Max digits <input id="divisionMax" type="number" min="1" max="6" value="3"></label></div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="modal-actions"><button id="saveSettingsBtn" type="button">Done</button></div>
+    </div>
+  </section>
+
+  <script>
+    const state = {
+      started: false,
+      startTime: 0,
+      timerId: null,
+      current: null,
+      totalAnswered: 0,
+      correct: 0,
+      wrong: 0,
+      streak: 0,
+      questionNumber: 0,
+      limit: 25,
+      history: [],
+      wrongs: [],
+      reviewQueue: [],
+      reviewMode: false,
+      advancing: false
+    };
+
+    const els = {
+      settingsBtn: document.getElementById('settingsBtn'),
+      settingsModal: document.getElementById('settingsModal'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+      startBtn: document.getElementById('startBtn'),
+      timer: document.getElementById('timer'),
+      score: document.getElementById('score'),
+      accuracy: document.getElementById('accuracy'),
+      streak: document.getElementById('streak'),
+      questionLimit: document.getElementById('questionLimit'),
+      roundingMode: document.getElementById('roundingMode'),
+      modePill: document.getElementById('modePill'),
+      questionText: document.getElementById('questionText'),
+      questionDetail: document.getElementById('questionDetail'),
+      answerInput: document.getElementById('answerInput'),
+      submitBtn: document.getElementById('submitBtn'),
+      skipBtn: document.getElementById('skipBtn'),
+      feedback: document.getElementById('feedback'),
+      resultsPanel: document.getElementById('resultsPanel'),
+      finalSummary: document.getElementById('finalSummary'),
+      wrongList: document.getElementById('wrongList'),
+      practiceWrongsBtn: document.getElementById('practiceWrongsBtn')
+    };
+
+    const typeLabels = {
+      addition: 'Addition',
+      subtraction: 'Subtraction',
+      multiplication: 'Multiplication',
+      division: 'Division',
+      tsd: 'Time / speed / distance',
+      fuel: 'Fuel',
+      climb: 'Climb / descent',
+      eta: 'ETA',
+      wind: 'Wind basics'
+    };
+
+    function randomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function choice(items) { return items[randomInt(0, items.length - 1)]; }
+
+    function clampNumber(value, fallback, min, max) {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.min(max, Math.max(min, Math.round(parsed)));
+    }
+
+    function digitsValue(id, fallback = 1) { return clampNumber(document.getElementById(id).value, fallback, 1, 6); }
+
+    function numberWithDigits(digits) {
+      const safeDigits = clampNumber(digits, 1, 1, 6);
+      const min = safeDigits === 1 ? 1 : 10 ** (safeDigits - 1);
+      const max = 10 ** safeDigits - 1;
+      return randomInt(min, max);
+    }
+
+    function getDigitPair(op) {
+      const card = document.querySelector(`.digit-card[data-op="${op}"]`);
+      const randomMode = card.dataset.mode === 'random';
+      if (randomMode) {
+        const maxDigits = digitsValue(`${op}Max`, 3);
+        return { a: randomInt(1, maxDigits), b: randomInt(1, maxDigits) };
+      }
+      return { a: digitsValue(`${op}A`, 2), b: digitsValue(`${op}B`, 1) };
+    }
+
+    function getConfig() {
+      const enabled = [...document.querySelectorAll('.typeToggle:checked')].map(item => item.value);
+      return {
+        limit: clampNumber(els.questionLimit.value, 25, 0, 1000),
+        roundingMode: els.roundingMode.value,
+        enabled: enabled.length ? enabled : ['addition']
+      };
+    }
+
+    function roundForMode(value) {
+      if (els.roundingMode.value === 'tenth') return Math.round(value * 10) / 10;
+      return Math.round(value);
+    }
+
+    function formatAnswer(value) {
+      if (Number.isInteger(value)) return String(value);
+      return String(Math.round(value * 10) / 10);
+    }
+
+    function formatMinutes(totalMinutes) {
+      const rounded = Math.round(totalMinutes);
+      const hours = Math.floor(rounded / 60);
+      const minutes = rounded % 60;
+      if (!hours) return `${minutes} min`;
+      return `${hours} hr ${minutes} min`;
+    }
+
+    function isCorrect(userText, answer) {
+      const cleaned = String(userText).trim().replace(',', '.');
+      if (cleaned === '') return false;
+      const userNumber = Number(cleaned);
+      if (!Number.isFinite(userNumber)) return false;
+      const tolerance = els.roundingMode.value === 'tenth' ? 0.05 : 0.49;
+      return Math.abs(userNumber - answer) <= tolerance;
+    }
+
+    function makeQuestion(type) {
+      return {
+        addition: makeAddition,
+        subtraction: makeSubtraction,
+        multiplication: makeMultiplication,
+        division: makeDivision,
+        tsd: makeTsd,
+        fuel: makeFuel,
+        climb: makeClimb,
+        eta: makeEta,
+        wind: makeWind
+      }[type]();
+    }
+
+    function makeAddition() {
+      const digits = getDigitPair('addition');
+      const a = numberWithDigits(digits.a);
+      const b = numberWithDigits(digits.b);
+      const answer = a + b;
+      return { type: 'addition', label: typeLabels.addition, text: `${a} + ${b} = ?`, detail: '', answer, answerText: formatAnswer(answer) };
+    }
+
+    function makeSubtraction() {
+      const digits = getDigitPair('subtraction');
+      let a = numberWithDigits(digits.a);
+      let b = numberWithDigits(digits.b);
+      if (b > a) [a, b] = [b, a];
+      const answer = a - b;
+      return { type: 'subtraction', label: typeLabels.subtraction, text: `${a} - ${b} = ?`, detail: '', answer, answerText: formatAnswer(answer) };
+    }
+
+    function makeMultiplication() {
+      const digits = getDigitPair('multiplication');
+      const a = numberWithDigits(digits.a);
+      const b = numberWithDigits(digits.b);
+      const answer = a * b;
+      return { type: 'multiplication', label: typeLabels.multiplication, text: `${a} x ${b} = ?`, detail: '', answer, answerText: formatAnswer(answer) };
+    }
+
+    function makeDivision() {
+      const digits = getDigitPair('division');
+      const quotient = numberWithDigits(digits.a);
+      const divisor = numberWithDigits(digits.b);
+      const dividend = quotient * divisor;
+      return { type: 'division', label: typeLabels.division, text: `${dividend} / ${divisor} = ?`, detail: '', answer: quotient, answerText: formatAnswer(quotient) };
+    }
+
+    function makeTsd() {
+      const speed = choice([60, 75, 90, 100, 105, 120, 135, 150]);
+      const minutes = choice([10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 50, 60, 72, 90]);
+      const distance = roundForMode(speed * minutes / 60);
+      const ask = choice(['distance', 'time', 'speed']);
+
+      if (ask === 'distance') {
+        return { type: 'tsd', label: typeLabels.tsd, text: `You fly at ${speed} knots for ${minutes} minutes. How many nautical miles will you travel?`, detail: '', answer: distance, answerText: `${formatAnswer(distance)} NM` };
+      }
+
+      if (ask === 'time') {
+        const answer = roundForMode(distance / speed * 60);
+        return { type: 'tsd', label: typeLabels.tsd, text: `You need to fly ${distance} nautical miles at ${speed} knots. How many minutes will it take?`, detail: '', answer, answerText: `${formatAnswer(answer)} min` };
+      }
+
+      const answer = roundForMode(distance / minutes * 60);
+      return { type: 'tsd', label: typeLabels.tsd, text: `You covered ${distance} nautical miles in ${minutes} minutes. What was your groundspeed in knots?`, detail: '', answer, answerText: `${formatAnswer(answer)} kt` };
+    }
+
+    function makeFuel() {
+      const burn = choice([6, 8, 9, 10, 12, 15]);
+      const minutes = choice([15, 20, 25, 30, 35, 40, 45, 50, 60, 75, 90, 120, 150]);
+      const gallons = roundForMode(burn * minutes / 60);
+      const ask = choice(['fuel', 'time']);
+
+      if (ask === 'fuel') {
+        return { type: 'fuel', label: typeLabels.fuel, text: `Your engine burns ${burn} gallons per hour and you fly for ${minutes} minutes. How many gallons will you use?`, detail: '', answer: gallons, answerText: `${formatAnswer(gallons)} gal` };
+      }
+
+      const answer = roundForMode(gallons / burn * 60);
+      return { type: 'fuel', label: typeLabels.fuel, text: `You have ${gallons} gallons available and burn ${burn} gallons per hour. How many minutes can you fly?`, detail: '', answer, answerText: `${formatAnswer(answer)} min` };
+    }
+
+    function makeClimb() {
+      const feet = choice([1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000]);
+      const fpm = choice([300, 400, 500, 600, 700, 800, 900, 1000]);
+      const answer = roundForMode(feet / fpm);
+      const climbOrDescent = choice(['climb', 'descend']);
+      return { type: 'climb', label: typeLabels.climb, text: `You need to ${climbOrDescent} ${feet} feet at ${fpm} feet per minute. How many minutes will it take?`, detail: '', answer, answerText: `${formatAnswer(answer)} min` };
+    }
+
+    function makeEta() {
+      const startHour = randomInt(7, 20);
+      const startMinute = choice([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
+      const speed = choice([90, 100, 105, 120, 135, 150]);
+      const distance = choice([30, 45, 50, 60, 75, 90, 100, 120, 150, 180]);
+      const enrouteMinutes = Math.round(distance / speed * 60);
+      const startTotal = startHour * 60 + startMinute;
+      const etaTotal = startTotal + enrouteMinutes;
+      const etaHour = Math.floor((etaTotal / 60) % 24);
+      const etaMinute = etaTotal % 60;
+      const etaNumber = etaHour * 100 + etaMinute;
+      const hh = String(startHour).padStart(2, '0');
+      const mm = String(startMinute).padStart(2, '0');
+      const etaText = `${String(etaHour).padStart(2, '0')}${String(etaMinute).padStart(2, '0')}`;
+      return { type: 'eta', label: typeLabels.eta, text: `You depart at ${hh}${mm} and fly ${distance} nautical miles at ${speed} knots. What is your ETA?`, detail: '', answer: etaNumber, answerText: etaText };
+    }
+
+    function makeWind() {
+      const trueAirspeed = choice([90, 100, 110, 120, 130, 140]);
+      const windSpeed = choice([5, 10, 15, 20, 25, 30]);
+      const angle = choice([10, 20, 30, 45, 60, 90]);
+      const crosswind = roundForMode(windSpeed * Math.sin(angle * Math.PI / 180));
+      const headwind = roundForMode(windSpeed * Math.cos(angle * Math.PI / 180));
+      const wca = roundForMode(crosswind / trueAirspeed * 60);
+      const ask = choice(['crosswind', 'headwind', 'wca']);
+
+      if (ask === 'crosswind') {
+        return { type: 'wind', label: typeLabels.wind, text: `The wind is ${windSpeed} knots and ${angle} degrees off your nose. What is the crosswind component?`, detail: '', answer: crosswind, answerText: `${formatAnswer(crosswind)} kt` };
+      }
+
+      if (ask === 'headwind') {
+        return { type: 'wind', label: typeLabels.wind, text: `The wind is ${windSpeed} knots and ${angle} degrees off your nose. What is the headwind component?`, detail: '', answer: headwind, answerText: `${formatAnswer(headwind)} kt` };
+      }
+
+      return { type: 'wind', label: typeLabels.wind, text: `You have a ${crosswind}-knot crosswind and ${trueAirspeed} knots true airspeed. What wind correction angle should you use?`, detail: '', answer: wca, answerText: `${formatAnswer(wca)} deg` };
+    }
+
+    function startPractice(reviewOnly = false) {
+      resetSession(reviewOnly);
+      const config = getConfig();
+      state.started = true;
+      state.reviewMode = reviewOnly;
+      state.limit = reviewOnly ? state.reviewQueue.length : config.limit;
+      state.startTime = Date.now();
+      state.timerId = setInterval(updateTimer, 250);
+      els.answerInput.disabled = false;
+      els.submitBtn.disabled = false;
+      els.skipBtn.disabled = false;
+      els.resultsPanel.classList.add('hidden');
+      nextQuestion(reviewOnly);
+      updateStats();
+    }
+
+    function resetSession(keepReview = false) {
+      clearInterval(state.timerId);
+      state.started = false;
+      state.startTime = 0;
+      state.timerId = null;
+      state.current = null;
+      state.totalAnswered = 0;
+      state.correct = 0;
+      state.wrong = 0;
+      state.streak = 0;
+      state.questionNumber = 0;
+      state.limit = getConfig().limit;
+      state.history = [];
+      state.wrongs = [];
+      state.reviewMode = false;
+      state.advancing = false;
+      if (!keepReview) state.reviewQueue = [];
+      els.feedback.textContent = '';
+      els.feedback.className = 'feedback';
+      els.answerInput.value = '';
+      els.answerInput.disabled = true;
+      els.submitBtn.disabled = true;
+      els.skipBtn.disabled = true;
+      els.modePill.textContent = 'Ready';
+      els.questionText.textContent = 'Press Start.';
+      els.questionDetail.textContent = 'Setup in the menu.';
+      updateTimer(true);
+      updateStats();
+    }
+
+    function nextQuestion(reviewOnly = false) {
+      if (!state.started) return;
+      if (state.limit > 0 && state.questionNumber >= state.limit) {
+        finishPractice();
+        return;
+      }
+
+      state.advancing = false;
+      state.questionNumber += 1;
+      let question;
+
+      if (reviewOnly && state.reviewQueue.length) {
+        const old = state.reviewQueue.shift();
+        question = { ...old, detail: '', startedAt: Date.now() };
+      } else {
+        const config = getConfig();
+        question = makeQuestion(choice(config.enabled));
+        question.startedAt = Date.now();
+      }
+
+      state.current = question;
+      els.modePill.textContent = question.label;
+      els.questionText.textContent = question.text;
+      els.questionDetail.textContent = question.detail;
+      els.answerInput.value = '';
+      els.feedback.textContent = '';
+      els.feedback.className = 'feedback';
+      updateStats();
+      focusAnswer();
+    }
+
+    function submitAnswer(skipped = false) {
+      if (!state.started || !state.current || state.advancing) return;
+
+      const userAnswer = skipped ? '' : els.answerInput.value;
+      const correct = !skipped && isCorrect(userAnswer, state.current.answer);
+      const elapsed = (Date.now() - state.current.startedAt) / 1000;
+      const item = { ...state.current, userAnswer: skipped ? 'Skipped' : userAnswer.trim(), correct, elapsed };
+
+      state.history.push(item);
+      state.totalAnswered += 1;
+
+      if (correct) {
+        state.correct += 1;
+        state.streak += 1;
+        els.feedback.textContent = 'Correct';
+        els.feedback.className = 'feedback good';
+        state.advancing = true;
+        updateStats();
+        setTimeout(() => nextQuestion(state.reviewMode), 420);
+        return;
+      }
+
+      state.wrong += 1;
+      state.streak = 0;
+      state.wrongs.push(item);
+      els.feedback.textContent = skipped ? `Skipped. ${state.current.answerText}` : `Answer: ${state.current.answerText}`;
+      els.feedback.className = 'feedback bad';
+      state.advancing = true;
+      updateStats();
+      setTimeout(() => nextQuestion(state.reviewMode), 1250);
+    }
+
+    function finishPractice() {
+      clearInterval(state.timerId);
+      state.started = false;
+      els.answerInput.disabled = true;
+      els.submitBtn.disabled = true;
+      els.skipBtn.disabled = true;
+      els.modePill.textContent = 'Finished';
+      els.questionText.textContent = 'Done.';
+      els.questionDetail.textContent = 'Missed ones below.';
+      els.feedback.textContent = '';
+      els.feedback.className = 'feedback';
+      showResults();
+      updateStats();
+    }
+
+    function showResults() {
+      const total = state.totalAnswered;
+      const accuracy = total ? Math.round(state.correct / total * 100) : 100;
+      const totalTime = state.history.reduce((sum, item) => sum + item.elapsed, 0);
+      const avg = total ? Math.round(totalTime / total) : 0;
+
+      els.resultsPanel.classList.remove('hidden');
+      els.finalSummary.textContent = `${state.correct} / ${total}. ${accuracy}%. Avg ${avg}s.`;
+      els.finalSummary.className = state.wrongs.length ? 'result-summary has-wrongs' : 'result-summary';
+      els.practiceWrongsBtn.disabled = state.wrongs.length === 0;
+
+      if (!state.wrongs.length) {
+        els.wrongList.innerHTML = '';
+        return;
+      }
+
+      els.wrongList.innerHTML = state.wrongs.map((item, index) => `
+        <div class="result-item">
+          <strong>${index + 1}. ${escapeHtml(item.text)}</strong>
+          <span>You: ${escapeHtml(item.userAnswer || 'blank')} | Correct: ${escapeHtml(item.answerText)} | ${escapeHtml(item.label)}</span>
+        </div>
+      `).join('');
+    }
+
+    function updateTimer(forceZero = false) {
+      if (forceZero || !state.startTime) {
+        els.timer.textContent = '00:00';
+        return;
+      }
+      const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      els.timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function updateStats() {
+      els.score.textContent = `${state.correct} / ${state.totalAnswered}`;
+      const accuracy = state.totalAnswered ? Math.round(state.correct / state.totalAnswered * 100) : 100;
+      els.accuracy.textContent = `${accuracy}%`;
+      els.streak.textContent = state.streak;
+    }
+
+    function focusAnswer() {
+      requestAnimationFrame(() => {
+        els.answerInput.focus();
+        els.answerInput.select();
+      });
+    }
+
+    function openSettings() {
+      els.settingsModal.classList.remove('hidden');
+      els.settingsModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSettings() {
+      els.settingsModal.classList.add('hidden');
+      els.settingsModal.setAttribute('aria-hidden', 'true');
+      if (state.started) focusAnswer();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    document.querySelectorAll('.digit-card').forEach(card => {
+      card.dataset.mode = 'fixed';
+      const button = card.querySelector('.modeBtn');
+      const fixedInputs = card.querySelector('.fixedInputs');
+      const randomInputs = card.querySelector('.randomInputs');
+
+      button.addEventListener('click', () => {
+        const randomMode = card.dataset.mode !== 'random';
+        card.dataset.mode = randomMode ? 'random' : 'fixed';
+        button.textContent = randomMode ? 'Fixed' : 'Random';
+        fixedInputs.classList.toggle('hidden', randomMode);
+        randomInputs.classList.toggle('hidden', !randomMode);
+      });
+    });
+
+    els.settingsBtn.addEventListener('click', openSettings);
+    els.closeSettingsBtn.addEventListener('click', closeSettings);
+    els.saveSettingsBtn.addEventListener('click', closeSettings);
+    els.settingsModal.addEventListener('click', event => {
+      if (event.target === els.settingsModal) closeSettings();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !els.settingsModal.classList.contains('hidden')) closeSettings();
+    });
+
+    els.startBtn.addEventListener('click', () => startPractice(false));
+    els.submitBtn.addEventListener('click', () => submitAnswer(false));
+    els.skipBtn.addEventListener('click', () => submitAnswer(true));
+    els.answerInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitAnswer(false);
+      }
+    });
+    els.practiceWrongsBtn.addEventListener('click', () => {
+      if (!state.wrongs.length) return;
+      state.reviewQueue = state.wrongs.map(item => ({ ...item }));
+      startPractice(true);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && state.started) focusAnswer();
+    });
+
+    resetSession();
+  </script>
+</body>
+</html>
